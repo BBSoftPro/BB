@@ -19,6 +19,7 @@ using System.Text;
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpContextAccessor();
 var columnOptions = new ColumnOptions();
 
 // ჩვენი სვეტების სია
@@ -135,7 +136,7 @@ var app = builder.Build();
 // 1. ExceptionMiddleware (იჭერს კოდში მომხდარ Crash-ებს)
 app.UseMiddleware<ExceptionMiddleware>();
 
-// 2. StatusCodePages (იჭერს "ცარიელ" პასუხებს: 401, 404, 500)
+// 2. StatusCodePages (ჭერს "ცარიელ" პასუხებს: 401, 404, 500)
 app.UseStatusCodePages(async context => {
     context.HttpContext.Response.ContentType = "application/json";
     var statusCode = context.HttpContext.Response.StatusCode;
@@ -164,5 +165,30 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Seed only roles in Development (no automatic dev-admin creation)
+if (app.Environment.IsDevelopment()) {
+    using (var scope = app.Services.CreateScope()) {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
+
+        string[] roles = new[] { "Admin", "User" };
+        foreach (var role in roles) {
+            if (!await roleManager.RoleExistsAsync(role)) {
+                var createRoleResult = await roleManager.CreateAsync(new IdentityRole<int>(role));
+                if (!createRoleResult.Succeeded) {
+                    logger.LogError("Failed to create role {Role}: {Errors}", role,
+                        string.Join(", ", createRoleResult.Errors.Select(e => e.Description)));
+                }
+                else {
+                    logger.LogInformation("Created role {Role}", role);
+                }
+            }
+            else {
+                logger.LogInformation("Role {Role} already exists", role);
+            }
+        }
+    }
+}
 
 app.Run();

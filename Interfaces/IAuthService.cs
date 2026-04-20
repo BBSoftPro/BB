@@ -10,5 +10,8 @@ namespace BasisBank.Identity.Api.Interfaces {
         Task<VerifyOtpRes> VerifyOtpAndGetIdAsync(VerifyOtpReq verifyOtpReq, ClaimsPrincipal? currentUser);
         Task<LoginRes> RefreshTokenAsync(RefreshTokenReq? refreshTokenReq);
         Task LogoutAsync(RefreshTokenReq? req);
+#if DEBUG
+        Task<string> GenerateDevToken(string userName, string password);
+#endif
     }
 }

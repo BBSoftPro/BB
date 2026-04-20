@@ -14,23 +14,23 @@ using System.Security.Cryptography;
 namespace BasisBank.Identity.Api.Services {
     public class AuthService : IAuthService {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly ITokenService _tokenService;
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole<int>> roleManager,
             ITokenService tokenService,
             ApplicationDbContext context,
-            IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor) // დაემატა ინჟექცია
-        {
+            IConfiguration configuration
+        ) {
             _userManager = userManager;
+            _roleManager = roleManager;
             _tokenService = tokenService;
             _context = context;
             _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task LogoutAsync(RefreshTokenReq? req) {
@@ -71,6 +71,7 @@ namespace BasisBank.Identity.Api.Services {
             // 5. ძველი ტოკენის დახურვა
             storedToken.IsUsed = true;
             _context.RefreshTokens.Update(storedToken);
+            await _context.SaveChangesAsync();
 
             // 6. ახალი წყვილის გაცემა
             var roles = await _userManager.GetRolesAsync(user);
@@ -110,6 +111,24 @@ namespace BasisBank.Identity.Api.Services {
                 return new AuthRes { Success = false, Message = string.Join(", ", result.Errors.Select(e => e.Description)) };
             }
 
+            // დარეგისტრირების შემდეგ ავტომატურად მივანდოთ default role "User"
+            const string defaultRole = "User";
+            if (!await _roleManager.RoleExistsAsync(defaultRole)) {
+                var roleCreate = await _roleManager.CreateAsync(new IdentityRole<int>(defaultRole));
+                if (!roleCreate.Succeeded) {
+                    // არ გამოდგა role-ის შექმნა — სადაას არგათამაშებთ მომხმარებელს, წაშალეთ newly created user ან დააბრუნეთ შეცდომა
+                    await _userManager.DeleteAsync(user);
+                    return new AuthRes { Success = false, Message = "Failed to create default role." };
+                }
+            }
+
+            var addRoleResult = await _userManager.AddToRoleAsync(user, defaultRole);
+            if (!addRoleResult.Succeeded) {
+                // role მინიჭება ვერ მოხდა — rollback user creation to avoid orphan user without proper role
+                await _userManager.DeleteAsync(user);
+                return new AuthRes { Success = false, Message = "User created but failed to assign default role: " + string.Join(", ", addRoleResult.Errors.Select(e => e.Description)) };
+            }
+
             return new AuthRes { Success = true, Message = "მომხმარებელი წარმატებით დარეგისტრირდა." };
         }
 
@@ -121,7 +140,7 @@ namespace BasisBank.Identity.Api.Services {
 
             if (signInReq.VerificationId.HasValue) {
                 var jti = currentUser?.FindFirstValue(JwtRegisteredClaimNames.Jti);
-                var userIdClaim = currentUser?.FindFirstValue(ClaimTypes.NameIdentifier);
+                var userIdClaim = currentUser?.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
                 if (currentUser == null || string.IsNullOrEmpty(jti) || string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId)) {
                     throw new ApiException(ApiErrorCode.Unauthorized, "Unauthorized", 401);
@@ -176,7 +195,7 @@ namespace BasisBank.Identity.Api.Services {
             }
 
             var jti = currentUser?.FindFirstValue(JwtRegisteredClaimNames.Jti);
-            var userIdClaim = currentUser?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = currentUser?.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             if (currentUser == null || string.IsNullOrEmpty(jti) || string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId)) {
                 throw new ApiException(ApiErrorCode.Unauthorized, "Unauthorized", 401);
@@ -230,7 +249,7 @@ namespace BasisBank.Identity.Api.Services {
         public async Task<VerifyOtpRes> VerifyOtpAndGetIdAsync(VerifyOtpReq verifyOtpReq, ClaimsPrincipal? currentUser) {
 
             var jti = currentUser?.FindFirstValue(JwtRegisteredClaimNames.Jti);
-            var userIdClaim = currentUser?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdClaim = currentUser?.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             if (currentUser == null || string.IsNullOrEmpty(jti) || string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId)) {
                 throw new ApiException(ApiErrorCode.Unauthorized, "Unauthorized", 401);
@@ -315,7 +334,7 @@ namespace BasisBank.Identity.Api.Services {
                 var refreshTokenEntity = new RefreshToken {
                     Token = refreshToken,
                     UserId = user.Id,
-                    ExpiryDate = DateTime.UtcNow.AddMinutes(10), // შენი 10 წუთიანი ლიმიტი
+                    ExpiryDate = DateTime.UtcNow.AddMinutes(10),
                     IsUsed = false,
                     IsRevoked = false
                 };
@@ -331,5 +350,22 @@ namespace BasisBank.Identity.Api.Services {
                 UserName = user.UserName
             };
         }
+
+#if DEBUG
+        public async Task<string> GenerateDevToken(string userName, string password) {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
+                throw new Exception("მომხმარებელი ვერ მოიძებნა.");
+
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+            if (!isPasswordValid)
+                throw new Exception("პაროლი არასწორია.");
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var token = _tokenService.CreateToken(user, roles, true);
+
+            return token;
+        }
+#endif
     }
 }

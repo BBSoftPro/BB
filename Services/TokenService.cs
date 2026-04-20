@@ -20,22 +20,23 @@ namespace BasisBank.Identity.Api.Services {
 
             var claims = new List<Claim>
             {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName!),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-        new Claim("FirstName", user.FirstName ?? ""),
-        new Claim("LastName", user.LastName ?? ""),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        // MFA სტატუსი
-        new Claim("amr", isMfaVerified ? "mfa" : "pwd")
-    };
+                // Add NameIdentifier explicitly so other services/controllers can read ClaimTypes.NameIdentifier
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName!),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                new Claim("FirstName", user.FirstName ?? ""),
+                new Claim("LastName", user.LastName ?? ""),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                // MFA status
+                new Claim("amr", isMfaVerified ? "mfa" : "pwd")
+            };
 
-            // როლების დამატება
+            // roles
             foreach (var role in roles) {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            // ClaimsIdentity-ს შექმნა როლის ტიპის მითითებით
             var claimsIdentity = new ClaimsIdentity(claims, "Jwt", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
 
             var tokenDescriptor = new SecurityTokenDescriptor {
