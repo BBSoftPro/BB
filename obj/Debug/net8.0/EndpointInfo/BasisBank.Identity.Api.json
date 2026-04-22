@@ -437,7 +437,7 @@
     "securitySchemes": {
       "Bearer": {
         "type": "http",
-        "description": "შეიყვანეთ ტოკენი ასე: {your_token}",
+        "description": "შეიყვანეთ ტოკენი这样: {your_token}",
         "scheme": "Bearer",
         "bearerFormat": "JWT"
       }

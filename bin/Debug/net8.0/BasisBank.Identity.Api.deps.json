@@ -13,6 +13,7 @@
           "Microsoft.EntityFrameworkCore.Design": "8.0.25",
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.25",
           "Serilog.AspNetCore": "10.0.0",
+          "Serilog.Filters.Expressions": "2.1.0",
           "Serilog.Sinks.MSSqlServer": "9.0.3",
           "Swashbuckle.AspNetCore": "6.6.2"
         },
@@ -865,6 +866,18 @@
           }
         }
       },
+      "Serilog.Filters.Expressions/2.1.0": {
+        "dependencies": {
+          "Serilog": "4.3.1",
+          "Superpower": "2.3.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Serilog.Filters.Expressions.dll": {
+            "assemblyVersion": "2.1.0.0",
+            "fileVersion": "2.1.0.0"
+          }
+        }
+      },
       "Serilog.Formatting.Compact/3.0.0": {
         "dependencies": {
           "Serilog": "4.3.1"
@@ -934,6 +947,14 @@
           "lib/net8.0/Serilog.Sinks.MSSqlServer.dll": {
             "assemblyVersion": "9.0.3.0",
             "fileVersion": "9.0.3.0"
+          }
+        }
+      },
+      "Superpower/2.3.0": {
+        "runtime": {
+          "lib/netstandard2.0/Superpower.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "2.3.0.0"
           }
         }
       },
@@ -1596,6 +1617,13 @@
       "path": "serilog.extensions.logging/10.0.0",
       "hashPath": "serilog.extensions.logging.10.0.0.nupkg.sha512"
     },
+    "Serilog.Filters.Expressions/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-e0ZaK+NWx6+j71xB5dRXohdreSeHgMJ9mp4giSp83/4UC8VsJWDH+CAT1YVXsyINAR9IQznXllnJ0e5j+BvwzA==",
+      "path": "serilog.filters.expressions/2.1.0",
+      "hashPath": "serilog.filters.expressions.2.1.0.nupkg.sha512"
+    },
     "Serilog.Formatting.Compact/3.0.0": {
       "type": "package",
       "serviceable": true,
@@ -1637,6 +1665,13 @@
       "sha512": "sha512-eUj3q4JJxedjOuK9M7cEhG4YHrUcbmvDnkp4ueAmLoM7g8KwoIScqK9DpYTbE8ikM8B5QQQkJrjre7B2bVXu7A==",
       "path": "serilog.sinks.mssqlserver/9.0.3",
       "hashPath": "serilog.sinks.mssqlserver.9.0.3.nupkg.sha512"
+    },
+    "Superpower/2.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-L7ZLWjec5aPWWebsOKM6+8SdobSFMPJFIS8S8TT46oH2iELA70H95spRMeP1yPH9nDL/o+XYP29DPtVwVdzPeA==",
+      "path": "superpower/2.3.0",
+      "hashPath": "superpower.2.3.0.nupkg.sha512"
     },
     "Swashbuckle.AspNetCore/6.6.2": {
       "type": "package",

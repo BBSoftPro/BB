@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using BasisBank.Identity.Api.Exceptions;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BasisBank.Identity.Api.Helpers {
@@ -8,8 +9,12 @@ namespace BasisBank.Identity.Api.Helpers {
         public HashHelper(IConfiguration configuration) {
             var secret = configuration["OtpSettings:SecretKey"];
 
-            if (string.IsNullOrEmpty(secret)) {
-                throw new InvalidOperationException("system error, please try again lateer");
+            if (string.IsNullOrWhiteSpace(secret)) {
+                throw new ApiException(
+                    ApiErrorCode.InternalServerError,
+                    "OtpSettings:SecretKey missing",
+                    500
+                );
             }
 
             _keyBytes = Encoding.UTF8.GetBytes(secret);

@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Serilog.Debugging;
+using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -20,9 +22,10 @@ using System.Text;
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
-var columnOptions = new ColumnOptions();
 
-// ჩვენი სვეტების სია
+var columnOptions = new ColumnOptions();
+columnOptions.Store.Clear();
+// დამატებითი სვეტების სია
 columnOptions.AdditionalColumns = new Collection<SqlColumn>
 {
     new SqlColumn { ColumnName = "ApplicationId", DataType = SqlDbType.Int },
@@ -37,12 +40,27 @@ columnOptions.AdditionalColumns = new Collection<SqlColumn>
     new SqlColumn { ColumnName = "GroupId", DataType = SqlDbType.UniqueIdentifier }
 };
 
+// Use configuration value if present (add "MonitoringConnection" to appsettings), fallback to local
+var monitoringConn = builder.Configuration.GetConnectionString("MonitoringConnection")
+                     ?? "Server=.;Database=Monitoring_DB;Trusted_Connection=True;TrustServerCertificate=True;";
+
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.MSSqlServer(
-        connectionString: "Server=.;Database=Monitoring_DB;Trusted_Connection=True;TrustServerCertificate=True;",
-        sinkOptions: new MSSqlServerSinkOptions { TableName = "ActivityLogs", AutoCreateSqlTable = true },
-        columnOptions: columnOptions)
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("ApplicationName", "BasisBank.Identity.Api")
+    .Enrich.WithProperty("ServiceName", "Identity")
+    // DB sink — only events where LogToDb = true
+    .WriteTo.Logger(lc => lc
+        .Filter.ByIncludingOnly(le => le.Properties.ContainsKey("LogToDb") && le.Properties["LogToDb"].ToString().Trim('"').Equals("True", StringComparison.OrdinalIgnoreCase))
+        .WriteTo.MSSqlServer(
+            connectionString: monitoringConn,
+            sinkOptions: new Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions { TableName = "ActivityLogs", AutoCreateSqlTable = true },
+            columnOptions: columnOptions))
+    .WriteTo.Console()
     .CreateLogger();
+
+SelfLog.Enable(msg => Console.Error.WriteLine($"Serilog SelfLog: {msg}"));
 
 builder.Host.UseSerilog();
 // --- 1. Database & Identity Services ---
@@ -117,7 +135,7 @@ builder.Services.AddSwaggerGen(c => {
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "შეიყვანეთ ტოკენი ასე: {your_token}"
+        Description = "შეიყვანეთ ტოკენი这样: {your_token}"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement {
         {
@@ -130,11 +148,6 @@ builder.Services.AddSwaggerGen(c => {
 });
 
 var app = builder.Build();
-
-// --- 6. Middleware Pipeline ---
-
-// 1. ExceptionMiddleware (იჭერს კოდში მომხდარ Crash-ებს)
-app.UseMiddleware<ExceptionMiddleware>();
 
 // 2. StatusCodePages (ჭერს "ცარიელ" პასუხებს: 401, 404, 500)
 app.UseStatusCodePages(async context => {
@@ -159,9 +172,12 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwaggerUI();
 }
 
+// pipeline ordering (recommended)
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseAuthentication();                         // ensure authentication runs
+app.UseMiddleware<RequestResponseLoggingMiddleware>(); // logging after authentication
 app.UseAuthorization();
 
 app.MapControllers();

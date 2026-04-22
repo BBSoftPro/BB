@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BasisBank.Identity.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+646fb07475c85ac599db8d8181fd37fac63c9459")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5c3f4c8f8c1713498ee1efe88a0ac6d175a9fcfc")]
 [assembly: System.Reflection.AssemblyProductAttribute("BasisBank.Identity.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BasisBank.Identity.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

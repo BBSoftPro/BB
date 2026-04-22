@@ -1198,6 +1198,23 @@
           }
         }
       },
+      "Serilog.Filters.Expressions/2.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "2.9.0",
+          "Superpower": "2.3.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/Serilog.Filters.Expressions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Serilog.Filters.Expressions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Serilog.Formatting.Compact/3.0.0": {
         "type": "package",
         "dependencies": {
@@ -1296,6 +1313,19 @@
         },
         "runtime": {
           "lib/net8.0/Serilog.Sinks.MSSqlServer.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Superpower/2.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Superpower.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Superpower.dll": {
             "related": ".xml"
           }
         }
@@ -3740,6 +3770,23 @@
         "serilog.extensions.logging.nuspec"
       ]
     },
+    "Serilog.Filters.Expressions/2.1.0": {
+      "sha512": "e0ZaK+NWx6+j71xB5dRXohdreSeHgMJ9mp4giSp83/4UC8VsJWDH+CAT1YVXsyINAR9IQznXllnJ0e5j+BvwzA==",
+      "type": "package",
+      "path": "serilog.filters.expressions/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Serilog.Filters.Expressions.dll",
+        "lib/net45/Serilog.Filters.Expressions.xml",
+        "lib/netstandard1.5/Serilog.Filters.Expressions.dll",
+        "lib/netstandard1.5/Serilog.Filters.Expressions.xml",
+        "lib/netstandard2.0/Serilog.Filters.Expressions.dll",
+        "lib/netstandard2.0/Serilog.Filters.Expressions.xml",
+        "serilog.filters.expressions.2.1.0.nupkg.sha512",
+        "serilog.filters.expressions.nuspec"
+      ]
+    },
     "Serilog.Formatting.Compact/3.0.0": {
       "sha512": "wQsv14w9cqlfB5FX2MZpNsTawckN4a8dryuNGbebB/3Nh1pXnROHZov3swtu3Nj5oNG7Ba+xdu7Et/ulAUPanQ==",
       "type": "package",
@@ -3878,6 +3925,23 @@
         "serilog-sink-nuget.png",
         "serilog.sinks.mssqlserver.9.0.3.nupkg.sha512",
         "serilog.sinks.mssqlserver.nuspec"
+      ]
+    },
+    "Superpower/2.3.0": {
+      "sha512": "L7ZLWjec5aPWWebsOKM6+8SdobSFMPJFIS8S8TT46oH2iELA70H95spRMeP1yPH9nDL/o+XYP29DPtVwVdzPeA==",
+      "type": "package",
+      "path": "superpower/2.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Superpower.dll",
+        "lib/net45/Superpower.xml",
+        "lib/netstandard1.0/Superpower.dll",
+        "lib/netstandard1.0/Superpower.xml",
+        "lib/netstandard2.0/Superpower.dll",
+        "lib/netstandard2.0/Superpower.xml",
+        "superpower.2.3.0.nupkg.sha512",
+        "superpower.nuspec"
       ]
     },
     "Swashbuckle.AspNetCore/6.6.2": {
@@ -4703,6 +4767,7 @@
       "Microsoft.EntityFrameworkCore.Design >= 8.0.25",
       "Microsoft.EntityFrameworkCore.SqlServer >= 8.0.25",
       "Serilog.AspNetCore >= 10.0.0",
+      "Serilog.Filters.Expressions >= 2.1.0",
       "Serilog.Sinks.MSSqlServer >= 9.0.3",
       "Swashbuckle.AspNetCore >= 6.6.2"
     ]
@@ -4778,6 +4843,10 @@
           "Serilog.AspNetCore": {
             "target": "Package",
             "version": "[10.0.0, )"
+          },
+          "Serilog.Filters.Expressions": {
+            "target": "Package",
+            "version": "[2.1.0, )"
           },
           "Serilog.Sinks.MSSqlServer": {
             "target": "Package",

@@ -180,3 +180,5 @@ D:\Projects\CsharpProjects\BasisBank.OnlineShop\BasisBank.Identity.Api\obj\Debug
 D:\Projects\CsharpProjects\BasisBank.OnlineShop\BasisBank.Identity.Api\obj\Debug\net8.0\BasisBank.Identity.Api.pdb
 D:\Projects\CsharpProjects\BasisBank.OnlineShop\BasisBank.Identity.Api\obj\Debug\net8.0\BasisBank.Identity.Api.genruntimeconfig.cache
 D:\Projects\CsharpProjects\BasisBank.OnlineShop\BasisBank.Identity.Api\obj\Debug\net8.0\ref\BasisBank.Identity.Api.dll
+D:\Projects\CsharpProjects\BasisBank.OnlineShop\BasisBank.Identity.Api\bin\Debug\net8.0\Serilog.Filters.Expressions.dll
+D:\Projects\CsharpProjects\BasisBank.OnlineShop\BasisBank.Identity.Api\bin\Debug\net8.0\Superpower.dll
