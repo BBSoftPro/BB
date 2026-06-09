@@ -16,13 +16,7 @@ namespace BasisBank.Identity.Api.Controllers {
             _authService = authService;
             _logger = logger;
         }
-        [HttpGet("dev-token")]
-#if DEBUG
-        public IActionResult GetDevToken(string userName, string password) {
-            var token = _authService.GenerateDevToken(userName, password);
-            return Ok(new { AccessToken = token });
-        }
-#endif
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenReq? req) {
             await _authService.LogoutAsync(req);

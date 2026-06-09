@@ -37,16 +37,25 @@ namespace BasisBank.Identity.Api.Controllers {
 
         [HttpPost("assign")]
         public async Task<IActionResult> AssignRole([FromQuery] string userName, [FromQuery] string role) {
+            // 1. ვეძებთ მომხმარებელს
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null)
                 return NotFound("User not found.");
+
+            // 2. ვამოწმებთ, საერთოდ არსებობს თუ არა ასეთი როლი ბაზაში
             if (!await _roleManager.RoleExistsAsync(role))
                 return NotFound("Role not found.");
 
+            // 3. ვიღებთ იუზერის ყველა მიმდინარე როლს და ვშლით (რომ ახალმა გადაუწეროს)
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+            // 4. ვამატებთ ახალ როლს
             var res = await _userManager.AddToRoleAsync(user, role);
             if (!res.Succeeded)
                 return StatusCode(500, string.Join(", ", res.Errors.Select(e => e.Description)));
-            return Ok("Role assigned.");
+
+            return Ok("Role updated successfully.");
         }
 
         [HttpPost("revoke")]
